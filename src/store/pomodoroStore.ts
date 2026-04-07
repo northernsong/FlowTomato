@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { AppSettings, FeishuSyncResult } from '../env.d'
+import { DEFAULT_SETTINGS, getSettings, setSettings, sendNotification, feishuSync } from '../api'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -21,8 +22,8 @@ export interface PomodoroState {
   completedPomodoros: number
   sessions: Session[]
 
-  // Settings (loaded from main)
-  settings: AppSettings | null
+  // Settings
+  settings: AppSettings
 
   // Feishu last sync result
   lastSyncResult: FeishuSyncResult | null
@@ -38,36 +39,24 @@ export interface PomodoroActions {
   skip: () => void
   tick: () => void
   completePhase: () => void
-  loadSettings: () => Promise<void>
-  saveSettings: (partial: Partial<AppSettings>) => Promise<void>
+  loadSettings: () => void
+  saveSettings: (partial: Partial<AppSettings>) => void
   setActiveTab: (tab: PomodoroState['activeTab']) => void
   setLastSyncResult: (result: FeishuSyncResult | null) => void
 }
 
-// ─── Default settings (used until loaded from main) ───────────────────────────
-
-const DEFAULT_SETTINGS: AppSettings = {
-  feishu: { enabled: false },
-  workDuration: 25,
-  shortBreakDuration: 5,
-  longBreakDuration: 15,
-  longBreakInterval: 4,
-  autoStartBreaks: false,
-  autoStartWork: false,
-  notificationsEnabled: true,
-  alwaysOnTop: false
-}
-
 // ─── Store ────────────────────────────────────────────────────────────────────
+
+const initialSettings = getSettings()
 
 export const usePomodoroStore = create<PomodoroState & PomodoroActions>((set, get) => ({
   // Initial state
   phase: 'work',
-  timeLeft: DEFAULT_SETTINGS.workDuration * 60,
+  timeLeft: initialSettings.workDuration * 60,
   isRunning: false,
   completedPomodoros: 0,
   sessions: [],
-  settings: null,
+  settings: initialSettings,
   lastSyncResult: null,
   activeTab: 'timer',
 
@@ -147,13 +136,13 @@ export const usePomodoroStore = create<PomodoroState & PomodoroActions>((set, ge
       sessions: [session, ...state.sessions].slice(0, 100) // keep last 100
     }))
 
-    // Fire side effects (notification + feishu) via the preload bridge
+    // Fire side effects: notification + feishu sync
     const phaseLabels: Record<Phase, string> = {
       work: '专注完成！',
       shortBreak: '短休息结束',
       longBreak: '长休息结束'
     }
-    window.api.sendNotification('FlowTomato 🍅', phaseLabels[phase])
+    sendNotification('FlowTomato 🍅', phaseLabels[phase])
 
     if (s.feishu.enabled) {
       const payload = {
@@ -162,7 +151,7 @@ export const usePomodoroStore = create<PomodoroState & PomodoroActions>((set, ge
         durationSeconds,
         timestamp: Date.now()
       }
-      window.api.feishuSync(payload).then((result) => {
+      feishuSync(payload).then((result) => {
         get().setLastSyncResult(result)
         // Mark the session as synced
         set((state) => ({
@@ -174,8 +163,8 @@ export const usePomodoroStore = create<PomodoroState & PomodoroActions>((set, ge
     }
   },
 
-  loadSettings: async () => {
-    const settings = await window.api.getSettings()
+  loadSettings: () => {
+    const settings = getSettings()
     set((state) => {
       if (state.isRunning) return { settings }
       const phaseDurationKey: Record<Phase, keyof AppSettings> = {
@@ -188,8 +177,8 @@ export const usePomodoroStore = create<PomodoroState & PomodoroActions>((set, ge
     })
   },
 
-  saveSettings: async (partial) => {
-    const updated = await window.api.setSettings(partial)
+  saveSettings: (partial) => {
+    const updated = setSettings(partial)
     set({ settings: updated })
   },
 

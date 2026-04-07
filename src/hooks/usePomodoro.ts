@@ -3,7 +3,7 @@ import { usePomodoroStore } from '../store/pomodoroStore'
 
 /**
  * Drives the Pomodoro countdown tick every second.
- * Also bootstraps settings from the main process on mount.
+ * Also bootstraps settings from localStorage on mount.
  */
 export function usePomodoro(): void {
   const { isRunning, tick, loadSettings } = usePomodoroStore()

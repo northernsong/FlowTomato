@@ -3,7 +3,7 @@ import type { AppSettings, FeishuSyncResult } from '../env.d'
 
 interface SettingsProps {
   settings: AppSettings
-  onSave: (partial: Partial<AppSettings>) => Promise<void>
+  onSave: (partial: Partial<AppSettings>) => void
   onFeishuTest: () => Promise<FeishuSyncResult>
 }
 
@@ -24,8 +24,8 @@ export function Settings({ settings, onSave, onFeishuTest }: SettingsProps): JSX
     setForm((prev) => ({ ...prev, feishu: { ...prev.feishu, [key]: value } }))
   }
 
-  async function handleSave(): Promise<void> {
-    await onSave(form)
+  function handleSave(): void {
+    onSave(form)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -34,7 +34,7 @@ export function Settings({ settings, onSave, onFeishuTest }: SettingsProps): JSX
     setTesting(true)
     setTestResult(null)
     // Save feishu config first
-    await onSave({ feishu: form.feishu })
+    onSave({ feishu: form.feishu })
     const result = await onFeishuTest()
     setTestResult(result)
     setTesting(false)
@@ -116,14 +116,6 @@ export function Settings({ settings, onSave, onFeishuTest }: SettingsProps): JSX
             onChange={(e) => handleChange('notificationsEnabled', e.target.checked)}
           />
         </div>
-        <div className="setting-row">
-          <label>窗口置顶</label>
-          <input
-            type="checkbox"
-            checked={form.alwaysOnTop}
-            onChange={(e) => handleChange('alwaysOnTop', e.target.checked)}
-          />
-        </div>
       </section>
 
       {/* Feishu integration */}
@@ -141,7 +133,6 @@ export function Settings({ settings, onSave, onFeishuTest }: SettingsProps): JSX
         {form.feishu.enabled && (
           <>
             <p className="settings-hint">
-              方式一：Webhook（推荐）<br />
               在飞书群聊中添加「自定义机器人」，复制 Webhook URL 填入下方。
             </p>
             <div className="setting-row setting-row-full">
@@ -151,38 +142,6 @@ export function Settings({ settings, onSave, onFeishuTest }: SettingsProps): JSX
                 placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/..."
                 value={form.feishu.webhookUrl ?? ''}
                 onChange={(e) => handleFeishuChange('webhookUrl', e.target.value || undefined)}
-              />
-            </div>
-
-            <p className="settings-hint">
-              方式二：Bot API（支持更多功能）<br />
-              在飞书开放平台创建「自建应用」，获取 App ID 和 App Secret。
-            </p>
-            <div className="setting-row setting-row-full">
-              <label>App ID</label>
-              <input
-                type="text"
-                placeholder="cli_xxxxxxxxxxxxxxxx"
-                value={form.feishu.appId ?? ''}
-                onChange={(e) => handleFeishuChange('appId', e.target.value || undefined)}
-              />
-            </div>
-            <div className="setting-row setting-row-full">
-              <label>App Secret</label>
-              <input
-                type="password"
-                placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                value={form.feishu.appSecret ?? ''}
-                onChange={(e) => handleFeishuChange('appSecret', e.target.value || undefined)}
-              />
-            </div>
-            <div className="setting-row setting-row-full">
-              <label>接收消息的 Open ID</label>
-              <input
-                type="text"
-                placeholder="ou_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                value={form.feishu.receiverOpenId ?? ''}
-                onChange={(e) => handleFeishuChange('receiverOpenId', e.target.value || undefined)}
               />
             </div>
 
