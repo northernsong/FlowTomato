@@ -11,9 +11,5 @@
     "noUnusedParameters": true,
     "noEmit": true
   },
-  "include": [
-    "electron.vite.config.*",
-    "src/main/**/*",
-    "src/preload/**/*"
-  ]
+  "include": ["vite.config.*"]
 }

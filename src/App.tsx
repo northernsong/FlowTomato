@@ -4,6 +4,7 @@ import { Timer } from './components/Timer'
 import { Controls } from './components/Controls'
 import { History } from './components/History'
 import { Settings } from './components/Settings'
+import { feishuTest } from './api'
 import type { AppSettings } from './env.d'
 
 const DEFAULT_DURATIONS = {
@@ -98,11 +99,11 @@ export default function App(): JSX.Element {
           <History sessions={sessions} completedPomodoros={completedPomodoros} />
         )}
 
-        {activeTab === 'settings' && settings && (
+        {activeTab === 'settings' && (
           <Settings
             settings={settings}
             onSave={(partial: Partial<AppSettings>) => saveSettings(partial)}
-            onFeishuTest={() => window.api.feishuTest()}
+            onFeishuTest={feishuTest}
           />
         )}
       </main>
