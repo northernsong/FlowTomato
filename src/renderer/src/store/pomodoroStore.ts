@@ -176,12 +176,16 @@ export const usePomodoroStore = create<PomodoroState & PomodoroActions>((set, ge
 
   loadSettings: async () => {
     const settings = await window.api.getSettings()
-    const s = settings
-    set((state) => ({
-      settings,
-      // Reset timer if it hasn't started yet to reflect new duration
-      timeLeft: state.isRunning ? state.timeLeft : s[`${state.phase === 'work' ? 'work' : state.phase === 'shortBreak' ? 'shortBreak' : 'longBreak'}Duration`] * 60
-    }))
+    set((state) => {
+      if (state.isRunning) return { settings }
+      const phaseDurationKey: Record<Phase, keyof AppSettings> = {
+        work: 'workDuration',
+        shortBreak: 'shortBreakDuration',
+        longBreak: 'longBreakDuration'
+      }
+      const durationMinutes = settings[phaseDurationKey[state.phase]] as number
+      return { settings, timeLeft: durationMinutes * 60 }
+    })
   },
 
   saveSettings: async (partial) => {
