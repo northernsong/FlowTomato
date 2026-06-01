@@ -1,0 +1,14 @@
+README.md
+  h_b633c506414398 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.10-trip",
+  "base_commit_sha": "9bb41c4d747d14c80c04eb787afbe2860e03f11c",
+  "prompts": {},
+  "humans": {
+    "h_b633c506414398": {
+      "author": "song_y <song_y@trip.com>"
+    }
+  }
+}
