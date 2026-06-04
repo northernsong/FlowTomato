@@ -1,6 +1,6 @@
 # FlowTomato Agent Harness
 
-This repository is a Flutter-first personal productivity app that combines today tasks, a Pomodoro timer, local-first storage, and later Feishu Base sync.
+This repository is a Flutter-first personal productivity app that combines today tasks, a Pomodoro timer, local-first storage, and later NocoDB sync.
 
 ## Start Here
 
@@ -15,7 +15,7 @@ After reading, identify which implementation phase your task belongs to:
 
 1. Phase 1: Flutter project, local fake data, polished UI, basic task and timer interaction.
 2. Phase 2: local persistence with SQLite/Drift.
-3. Phase 3: Feishu Base sync and sync queue.
+3. Phase 3: NocoDB sync and sync queue.
 4. Phase 4: macOS packaging and desktop experience.
 
 ## Current Implementation Priority
@@ -82,7 +82,7 @@ Dart 3.11.5
 Keep the first implementation lean:
 
 1. Avoid introducing persistence before Phase 2.
-2. Avoid Feishu API code before Phase 3.
+2. Avoid NocoDB API code before Phase 3.
 3. Avoid desktop packaging work before Phase 4.
 4. Use Flutter built-in widgets when they are enough.
 5. Add third-party dependencies only when they remove real complexity.

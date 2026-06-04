@@ -12,12 +12,12 @@
 
 ## 2. 技术目标
 
-FlowTomato 使用 Flutter 构建单代码库应用，优先支持 macOS 桌面端，同时保留 Web/PWA 输出能力。第一阶段先完成高质量本地 UI 和核心交互；第二阶段接入飞书多维表格；第三阶段补齐番茄钟持久化、统计和同步队列；第四阶段强化 macOS 桌面体验。
+FlowTomato 使用 Flutter 构建单代码库应用，优先支持 macOS 桌面端，同时保留 Web/PWA 输出能力。第一阶段先完成高质量本地 UI 和核心交互；第二阶段接入NocoDB；第三阶段补齐番茄钟持久化、统计和同步队列；第四阶段强化 macOS 桌面体验。
 
 核心技术目标：
 
 1. 使用 Flutter 快速完成 macOS 风格的桌面应用界面。
-2. 通过清晰的分层架构隔离 UI、业务逻辑、本地存储和飞书 API。
+2. 通过清晰的分层架构隔离 UI、业务逻辑、本地存储和NocoDB API。
 3. 本地优先，离线可用，远端同步失败不影响用户继续操作。
 4. 番茄钟状态可恢复，刷新或重启后尽量不丢失关键计时信息。
 5. 为后续 Web/PWA 和 macOS 打包保留扩展空间。
@@ -31,7 +31,7 @@ FlowTomato 使用 Flutter 构建单代码库应用，优先支持 macOS 桌面�
 | 应用框架 | Flutter | 本地已安装，适合桌面端高质量 UI，也可输出 Web |
 | 语言 | Dart | Flutter 官方语言，类型系统稳定，适合状态建模 |
 | 首选运行平台 | macOS Desktop | 与 PRD 中 macOS 原生感目标一致，系统通知和本地存储更可控 |
-| 兼容平台 | Flutter Web | 保留 PWA 能力，但飞书同步需要额外处理密钥和 CORS |
+| 兼容平台 | Flutter Web | 保留 PWA 能力，但NocoDB同步需要额外处理密钥和 CORS |
 
 ### 3.2 推荐依赖
 
@@ -43,7 +43,7 @@ FlowTomato 使用 Flutter 构建单代码库应用，优先支持 macOS 桌面�
 | HTTP 客户端 | `dio` | 拦截器、错误处理和重试能力更完整 |
 | JSON 序列化 | `freezed` + `json_serializable` | 领域模型不可变，减少手写映射错误 |
 | 本地设置 | `shared_preferences` | 存储主题、通知开关、番茄默认时长等轻量配置 |
-| 安全存储 | `flutter_secure_storage` | 存储飞书 App Secret、Token 等敏感信息 |
+| 安全存储 | `flutter_secure_storage` | 存储 NocoDB personal access token 等敏感信息 |
 | 系统通知 | `flutter_local_notifications` | 支持桌面通知，作为番茄结束提醒 |
 | 桌面窗口 | `window_manager` | macOS 窗口尺寸、标题栏和窗口行为控制 |
 | 拖拽排序 | Flutter 内置 `ReorderableListView` | MVP 足够，避免过早引入复杂拖拽库 |
@@ -52,9 +52,9 @@ FlowTomato 使用 Flutter 构建单代码库应用，优先支持 macOS 桌面�
 
 | 方案 | 描述 | 优点 | 缺点 |
 | --- | --- | --- | --- |
-| 方案 A：纯 Flutter 本地应用 | Flutter macOS + 本地 SQLite + 飞书直连 | 实现最快，桌面体验好，本地能力完整 | Web 端飞书密钥安全不理想 |
-| 方案 B：Flutter + 后端同步服务 | Flutter 客户端 + 自建 API 转发飞书请求 | Web/PWA 更安全，可统一处理 Token | 需要额外部署后端 |
-| 方案 C：Flutter Web 优先 | 先做 Flutter Web/PWA，再适配桌面 | 分发简单 | 桌面原生感和系统能力弱，飞书 CORS/密钥问题更明显 |
+| 方案 A：纯 Flutter 本地应用 | Flutter macOS + 本地 SQLite + NocoDB直连 | 实现最快，桌面体验好，本地能力完整 | Web 端NocoDB密钥安全不理想 |
+| 方案 B：Flutter + 后端同步服务 | Flutter 客户端 + 自建 API 转发NocoDB请求 | Web/PWA 更安全，可统一处理 Token | 需要额外部署后端 |
+| 方案 C：Flutter Web 优先 | 先做 Flutter Web/PWA，再适配桌面 | 分发简单 | 桌面原生感和系统能力弱，NocoDB CORS/密钥问题更明显 |
 
 推荐采用方案 A 作为第一到第三阶段主线，方案 B 作为 Web/PWA 正式发布前的安全增强。这样能最快做出可用的本地桌面工具，也不把后端复杂度提前引入 MVP。
 
@@ -89,13 +89,13 @@ Flutter App
 │   └── SyncRepository
 └── Infrastructure
     ├── LocalDatabase
-    ├── FeishuBaseApiClient
+    ├── NocoDBApiClient
     ├── NotificationService
     ├── TimerEngine
     └── SecureStorage
 ```
 
-依赖方向只允许从上到下。UI 不直接访问数据库或飞书 API，必须通过 Controller 和 Repository。飞书同步作为后台能力存在，不能阻塞用户的本地操作。
+依赖方向只允许从上到下。UI 不直接访问数据库或NocoDB API，必须通过 Controller 和 Repository。NocoDB同步作为后台能力存在，不能阻塞用户的本地操作。
 
 ## 5. 目录结构设计
 
@@ -135,11 +135,11 @@ lib/
 │       ├── data/
 │       └── presentation/
 ├── integrations/
-│   └── feishu/
-│       ├── feishu_base_api_client.dart
-│       ├── feishu_auth_service.dart
-│       ├── feishu_field_mapper.dart
-│       └── feishu_sync_service.dart
+│   └── nocodb/
+│       ├── nocodb_base_api_client.dart
+│       ├── nocodb_auth_service.dart
+│       ├── nocodb_field_mapper.dart
+│       └── nocodb_sync_service.dart
 ├── shared/
 │   ├── database/
 │   ├── notifications/
@@ -230,21 +230,21 @@ completed
 
 1. 基于本地 Tasks 和 Pomodoro 表计算今日摘要。
 2. 展示完成任务数、完成番茄数、专注分钟数。
-3. 第三阶段同步 DailySummary 到飞书。
+3. 第三阶段同步 DailySummary 到NocoDB。
 
-MVP 中 DailySummary 可以先不落库，使用查询聚合实时计算；接入飞书后再增加持久化表，降低同步复杂度。
+MVP 中 DailySummary 可以先不落库，使用查询聚合实时计算；接入NocoDB后再增加持久化表，降低同步复杂度。
 
 ### 6.5 Settings 模块
 
 职责：
 
 1. 管理番茄钟时长、自动开始、通知开关、主题偏好。
-2. 管理飞书 Base 连接配置。
-3. 提供飞书连接测试和表结构校验。
+2. 管理NocoDB 连接配置。
+3. 提供NocoDB连接测试和表结构校验。
 
 敏感信息处理：
 
-1. `appSecret`、`accessToken` 等存入 `flutter_secure_storage`。
+1. NocoDB personal access token 等敏感配置存入 `flutter_secure_storage`。
 2. 设置页只展示脱敏内容。
 3. 日志和错误上报中不得输出完整密钥。
 
@@ -257,7 +257,7 @@ MVP 中 DailySummary 可以先不落库，使用查询聚合实时计算；接�
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
 | id | text | 本地 UUID |
-| remote_id | text nullable | 飞书记录 ID |
+| remote_id | text nullable | NocoDB记录 ID |
 | title | text | 任务标题 |
 | note | text nullable | 备注 |
 | status | text | todo、now、done |
@@ -277,7 +277,7 @@ MVP 中 DailySummary 可以先不落库，使用查询聚合实时计算；接�
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
 | id | text | 本地 UUID |
-| remote_id | text nullable | 飞书记录 ID |
+| remote_id | text nullable | NocoDB记录 ID |
 | task_id | text nullable | 本地任务 ID |
 | task_title | text nullable | 任务标题快照 |
 | stage | text | focus、shortBreak、longBreak |
@@ -325,38 +325,37 @@ UI 立即刷新
   ↓
 创建 sync_jobs
   ↓
-后台 SyncService 尝试同步飞书
+后台 SyncService 尝试同步NocoDB
   ↓
 更新 sync_status 和 remote_id
 ```
 
-## 8. 飞书 Base 集成设计
+## 8. NocoDB 集成设计
 
 ### 8.1 集成边界
 
-飞书集成放在 `integrations/feishu` 中，其他模块只依赖抽象 Repository，不感知飞书字段结构。
+NocoDB集成放在 `integrations/nocodb` 中，其他模块只依赖抽象 Repository，不感知NocoDB字段结构。
 
 核心类：
 
 | 类 | 职责 |
 | --- | --- |
-| `FeishuAuthService` | 获取和刷新访问令牌 |
-| `FeishuBaseApiClient` | 封装多维表格记录查询、创建、更新、删除 |
-| `FeishuFieldMapper` | 本地字段与飞书字段互转 |
-| `FeishuSyncService` | 消费同步队列，处理重试和状态回写 |
+| `NocoDBApiClient` | 封装表格记录查询、创建、更新、删除 |
+| `NocoDBFieldMapper` | 本地字段与NocoDB字段互转 |
+| `NocoDBSyncService` | 消费同步队列，处理重试和状态回写 |
 
 ### 8.2 鉴权方案
 
-macOS 桌面端 MVP 可使用飞书自建应用的 `appId` 和 `appSecret` 获取 tenant access token。凭据保存在本地安全存储中。
+macOS 桌面端 MVP 使用 NocoDB personal access token 直连记录 API。凭据保存在本地安全存储中，开发期可通过 `.env.local` 和 `--dart-define` 注入。
 
-Web/PWA 端不建议直接内置或保存 App Secret，因为浏览器环境无法真正保护密钥，也可能遇到飞书 API CORS 限制。若后续正式发布 Web 版本，建议增加一个轻量同步代理服务：
+Web/PWA 端不建议直接内置或保存 personal access token，因为浏览器环境无法真正保护密钥，也可能遇到 NocoDB API CORS 限制。若后续正式发布 Web 版本，建议增加一个轻量同步代理服务：
 
 ```text
 Flutter Web
   ↓
 FlowTomato Sync Proxy
   ↓
-Feishu Open API
+NocoDB API
 ```
 
 ### 8.3 同步策略
@@ -372,7 +371,7 @@ Feishu Open API
 
 设置页连接测试需要校验：
 
-1. Base Token 是否有效。
+1. NocoDB URL 和 personal access token 是否有效。
 2. Tasks、Pomodoro、DailySummary 表是否存在。
 3. 必要字段是否存在且类型可写。
 4. 当前凭据是否具备读取和写入权限。
@@ -437,15 +436,15 @@ MVP 不要求后台常驻计时；但计时状态必须持久化，重新打开�
 | --- | --- | --- |
 | ValidationError | 任务标题为空 | 请填写任务标题 |
 | LocalDatabaseError | SQLite 写入失败 | 本地保存失败，请重试 |
-| FeishuAuthError | Token 失效 | 飞书授权已失效，请重新配置 |
-| FeishuSchemaError | 表字段缺失 | 飞书表结构不完整，请检查配置 |
+| NocoDBAuthError | Token 失效 | NocoDB token 已失效，请重新配置 |
+| NocoDBSchemaError | 表字段缺失 | NocoDB表结构不完整，请检查配置 |
 | NetworkError | 网络不可用 | 网络异常，已保留本地修改 |
 | TimerStateError | 状态恢复异常 | 计时状态已重置 |
 
 ### 11.2 展示规则
 
 1. 本地操作失败使用 Toast 或 Banner。
-2. 飞书同步失败不打断当前操作，只在任务项和设置页显示状态。
+2. NocoDB同步失败不打断当前操作，只在任务项和设置页显示状态。
 3. 连接测试失败展示具体原因和下一步建议。
 
 ## 12. 测试策略
@@ -458,7 +457,7 @@ MVP 不要求后台常驻计时；但计时状态必须持久化，重新打开�
 2. Now 唯一性规则。
 3. 番茄钟状态机。
 4. 今日统计计算。
-5. 飞书字段映射。
+5. NocoDB字段映射。
 
 ### 12.2 Widget 测试
 
@@ -475,7 +474,7 @@ MVP 不要求后台常驻计时；但计时状态必须持久化，重新打开�
 
 1. 创建任务到完成任务的完整流程。
 2. 开始并完成一次短时番茄钟的流程。
-3. 模拟飞书同步成功和失败。
+3. 模拟NocoDB同步成功和失败。
 4. 重启后恢复计时状态。
 
 ## 13. 阶段实施方案
@@ -510,19 +509,19 @@ MVP 不要求后台常驻计时；但计时状态必须持久化，重新打开�
 2. 番茄钟运行或暂停状态可恢复。
 3. 今日统计来自真实本地数据。
 
-### 13.3 第三阶段：飞书同步
+### 13.3 第三阶段：NocoDB同步
 
 交付内容：
 
-1. 设置页增加飞书配置。
-2. 实现 Feishu API Client。
+1. 设置页增加NocoDB配置。
+2. 实现 NocoDB API Client。
 3. 实现同步队列和失败重试。
 4. 支持 Tasks 和 Pomodoro 表同步。
 
 验收：
 
-1. 能读取飞书今日任务。
-2. 本地创建、编辑、完成任务能同步到飞书。
+1. 能读取NocoDB今日任务。
+2. 本地创建、编辑、完成任务能同步到NocoDB。
 3. 番茄钟完成后能写入 Pomodoro 表。
 4. 同步失败可见且可重试。
 
@@ -582,16 +581,16 @@ flutter analyze
 
 | 风险 | 影响 | 处理策略 |
 | --- | --- | --- |
-| Flutter Web 直连飞书存在密钥和 CORS 问题 | Web/PWA 同步无法安全上线 | MVP 先做 macOS 直连，Web 正式发布前增加同步代理 |
+| Flutter Web 直连NocoDB存在密钥和 CORS 问题 | Web/PWA 同步无法安全上线 | MVP 先做 macOS 直连，Web 正式发布前增加同步代理 |
 | 桌面后台计时行为复杂 | 关闭窗口后计时不准确 | MVP 用时间戳恢复，后续再做后台常驻 |
-| 飞书表字段被用户修改 | 同步失败 | 设置页做表结构校验，错误信息明确到字段 |
+| NocoDB表字段被用户修改 | 同步失败 | 设置页做表结构校验，错误信息明确到字段 |
 | 同步冲突 | 本地和远端状态不一致 | MVP 本地优先，记录远端更新时间，后续支持冲突提示 |
 | UI 组件过早复杂化 | 影响开发速度 | 第一阶段使用内置组件和轻量自定义组件，稳定后再抽象 |
 
 ## 16. 待确认技术问题
 
-1. 飞书同步是否只要求 macOS 桌面端可用，还是 Web/PWA 也必须可用。
-2. 飞书 Base 表是否由用户提前创建，还是由应用引导创建字段。
+1. NocoDB同步是否只要求 macOS 桌面端可用，还是 Web/PWA 也必须可用。
+2. NocoDB 表是否由用户提前创建，还是由应用引导创建字段。
 3. macOS 关闭窗口后是否需要继续后台计时。
 4. 是否需要菜单栏倒计时入口。
 5. 是否需要历史日期回看，如果需要，本地查询和 UI 需要提前预留日期筛选。

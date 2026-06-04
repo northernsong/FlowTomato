@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -7,13 +8,20 @@ import 'features/pomodoro/application/pomodoro_controller.dart';
 import 'features/pomodoro/domain/pomodoro_state.dart';
 import 'features/tasks/application/task_board_controller.dart';
 import 'features/tasks/domain/task.dart';
+import 'integrations/nocodb/nocodb_base_api_client.dart';
+import 'integrations/nocodb/nocodb_http.dart';
+import 'integrations/nocodb/nocodb_models.dart';
+import 'integrations/nocodb/nocodb_setup_service.dart';
+import 'integrations/nocodb/nocodb_workspace_cache.dart';
 
 void main() {
   runApp(const FlowTomatoApp());
 }
 
 class FlowTomatoApp extends StatelessWidget {
-  const FlowTomatoApp({super.key});
+  const FlowTomatoApp({super.key, this.promptForNocoDBOnStart = true});
+
+  final bool promptForNocoDBOnStart;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +31,7 @@ class FlowTomatoApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       theme: _buildTheme(Brightness.light),
       darkTheme: _buildTheme(Brightness.dark),
-      home: const FlowTomatoHomePage(),
+      home: FlowTomatoHomePage(promptForNocoDBOnStart: promptForNocoDBOnStart),
     );
   }
 
@@ -55,7 +63,9 @@ class FlowTomatoApp extends StatelessWidget {
 }
 
 class FlowTomatoHomePage extends StatefulWidget {
-  const FlowTomatoHomePage({super.key});
+  const FlowTomatoHomePage({super.key, this.promptForNocoDBOnStart = true});
+
+  final bool promptForNocoDBOnStart;
 
   @override
   State<FlowTomatoHomePage> createState() => _FlowTomatoHomePageState();
@@ -67,12 +77,16 @@ class _FlowTomatoHomePageState extends State<FlowTomatoHomePage> {
   final TextEditingController _newTaskController = TextEditingController();
   Timer? _timer;
   int _recordedSessions = 0;
+  bool _didPromptNocoDB = false;
 
   @override
   void initState() {
     super.initState();
     _taskBoard = TaskBoardController()..addListener(_refresh);
     _pomodoro = PomodoroController()..addListener(_handlePomodoroChange);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybePromptNocoDBSettings();
+    });
   }
 
   @override
@@ -147,6 +161,7 @@ class _FlowTomatoHomePageState extends State<FlowTomatoHomePage> {
                   completedTasks: _taskBoard.completedTaskCount,
                   pomodoros: _taskBoard.completedPomodoroCount,
                   focusMinutes: _taskBoard.focusMinutes,
+                  onConnectNocoDB: _showNocoDBSettings,
                 ),
                 const SizedBox(height: 20),
                 Expanded(
@@ -226,6 +241,28 @@ class _FlowTomatoHomePageState extends State<FlowTomatoHomePage> {
     _pomodoro.startFocus(taskId: task?.id, taskTitle: task?.title);
     _startTicker();
   }
+
+  Future<void> _showNocoDBSettings() {
+    return showDialog<void>(
+      context: context,
+      builder: (context) => const _NocoDBSettingsDialog(),
+    );
+  }
+
+  Future<void> _maybePromptNocoDBSettings() async {
+    if (!widget.promptForNocoDBOnStart || _didPromptNocoDB || !mounted) {
+      return;
+    }
+    _didPromptNocoDB = true;
+    final cached = await NocoDBWorkspaceCache().read();
+    if (cached != null) {
+      return;
+    }
+    if (!mounted) {
+      return;
+    }
+    await _showNocoDBSettings();
+  }
 }
 
 class _Header extends StatelessWidget {
@@ -233,43 +270,373 @@ class _Header extends StatelessWidget {
     required this.completedTasks,
     required this.pomodoros,
     required this.focusMinutes,
+    required this.onConnectNocoDB,
   });
 
   final int completedTasks;
   final int pomodoros;
   final int focusMinutes;
+  final VoidCallback onConnectNocoDB;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Row(
+    final title = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
+        Text(
+          'FlowTomato',
+          style: textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Today focus workbench',
+          style: textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+    final actions = Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        _MetricPill(label: 'Done', value: '$completedTasks'),
+        _MetricPill(label: 'Tomatoes', value: '$pomodoros'),
+        _MetricPill(label: 'Minutes', value: '$focusMinutes'),
+        FilledButton.icon(
+          onPressed: onConnectNocoDB,
+          icon: const Icon(Icons.cloud_sync_rounded),
+          label: const Text('Connect NocoDB'),
+        ),
+      ],
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 820) {
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            children: [title, const SizedBox(height: 12), actions],
+          );
+        }
+        return Row(
+          children: [
+            Expanded(child: title),
+            actions,
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _NocoDBSettingsDialog extends StatefulWidget {
+  const _NocoDBSettingsDialog();
+
+  @override
+  State<_NocoDBSettingsDialog> createState() => _NocoDBSettingsDialogState();
+}
+
+class _NocoDBSettingsDialogState extends State<_NocoDBSettingsDialog> {
+  final TextEditingController _baseUrlController = TextEditingController(
+    text: _readInitialBaseUrl(),
+  );
+  final TextEditingController _apiTokenController = TextEditingController(
+    text: _readInitialApiToken(),
+  );
+
+  NocoDBWorkspaceConfig? _workspace;
+  String? _statusMessage;
+  bool _isBusy = false;
+  bool _canInitialize = false;
+
+  @override
+  void dispose() {
+    _baseUrlController.dispose();
+    _apiTokenController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('NocoDB app connection'),
+      content: SizedBox(
+        width: 560,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'FlowTomato',
-                style: textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
+              TextField(
+                key: const Key('nocodbBaseUrl'),
+                controller: _baseUrlController,
+                decoration: const InputDecoration(
+                  labelText: 'NocoDB Base URL',
+                  border: OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 10),
+              TextField(
+                key: const Key('nocodbApiToken'),
+                controller: _apiTokenController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Personal access token',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 8),
               Text(
-                'Today focus workbench',
-                style: textTheme.bodyMedium?.copyWith(
+                'FlowTomato will look for a FlowTomato base with Tasks, Pomodoro, and DailySummary tables. If it cannot find them, you can initialize them after confirmation.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: _isBusy ? null : _findOrValidateWorkspace,
+                icon: const Icon(Icons.check_circle_rounded),
+                label: const Text('Find NocoDB workspace'),
+              ),
+              if (_canInitialize) ...[
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: _isBusy ? null : _confirmAndInitializeWorkspace,
+                  icon: const Icon(Icons.add_rounded),
+                  label: const Text('Initialize FlowTomato tables'),
+                ),
+              ],
+              if (_workspace != null) ...[
+                const SizedBox(height: 12),
+                _NocoDBWorkspaceSummary(workspace: _workspace!),
+              ],
+              if (_statusMessage != null) ...[
+                const SizedBox(height: 12),
+                Text(
+                  _statusMessage!,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ],
           ),
         ),
-        _MetricPill(label: 'Done', value: '$completedTasks'),
-        const SizedBox(width: 8),
-        _MetricPill(label: 'Tomatoes', value: '$pomodoros'),
-        const SizedBox(width: 8),
-        _MetricPill(label: 'Minutes', value: '$focusMinutes'),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isBusy ? null : () => Navigator.of(context).pop(),
+          child: const Text('Close'),
+        ),
       ],
+    );
+  }
+
+  ({String baseUrl, String apiToken})? _readConnectionConfig() {
+    final baseUrl = _baseUrlController.text.trim();
+    final apiToken = _apiTokenController.text.trim();
+    if (baseUrl.isEmpty || apiToken.isEmpty) {
+      setState(() {
+        _statusMessage = 'Please fill in the NocoDB URL and token.';
+        _canInitialize = false;
+      });
+      return null;
+    }
+    return (baseUrl: baseUrl, apiToken: apiToken);
+  }
+
+  Future<void> _findOrValidateWorkspace() async {
+    final config = _readConnectionConfig();
+    if (config == null) {
+      return;
+    }
+    setState(() {
+      _isBusy = true;
+      _canInitialize = false;
+      _statusMessage = 'Looking for FlowTomato workspace...';
+    });
+    try {
+      final cached = await NocoDBWorkspaceCache().read();
+      final httpClient = HttpNocoDBHttpClient(
+        baseUri: Uri.parse(config.baseUrl),
+      );
+      final setup = NocoDBSetupService(
+        apiClient: NocoDBApiClient(http: httpClient),
+      );
+      final workspace =
+          cached != null &&
+              cached.baseUrl == config.baseUrl &&
+              cached.apiToken == config.apiToken
+          ? await setup.validateWorkspace(cached)
+          : await setup.findWorkspace(
+              baseUrl: config.baseUrl,
+              apiToken: config.apiToken,
+            );
+      if (!mounted) {
+        return;
+      }
+      if (workspace == null) {
+        setState(() {
+          _workspace = null;
+          _canInitialize = true;
+          _statusMessage =
+              'No complete FlowTomato workspace was found. Initialize it?';
+        });
+        return;
+      }
+      await NocoDBWorkspaceCache().write(workspace);
+      setState(() {
+        _workspace = workspace;
+        _canInitialize = false;
+        _statusMessage = 'NocoDB workspace is ready and cached.';
+      });
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _statusMessage = 'NocoDB app connection failed: $error';
+        _canInitialize = false;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isBusy = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _confirmAndInitializeWorkspace() async {
+    final config = _readConnectionConfig();
+    if (config == null) {
+      return;
+    }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Initialize NocoDB tables?'),
+        content: const Text(
+          'FlowTomato will create a FlowTomato base with Tasks, Pomodoro, and DailySummary tables.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Initialize'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
+    setState(() {
+      _isBusy = true;
+      _statusMessage = 'Initializing FlowTomato tables...';
+    });
+    try {
+      final httpClient = HttpNocoDBHttpClient(
+        baseUri: Uri.parse(config.baseUrl),
+      );
+      final setup = NocoDBSetupService(
+        apiClient: NocoDBApiClient(http: httpClient),
+      );
+      final workspace = await setup.initializeWorkspace(
+        baseUrl: config.baseUrl,
+        apiToken: config.apiToken,
+      );
+      await NocoDBWorkspaceCache().write(workspace);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _workspace = workspace;
+        _canInitialize = false;
+        _statusMessage = 'NocoDB workspace initialized and cached.';
+      });
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _statusMessage = 'NocoDB initialization failed: $error';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isBusy = false;
+        });
+      }
+    }
+  }
+}
+
+String _readInitialBaseUrl() {
+  const dartDefine = String.fromEnvironment('NOCO_BASE_URL');
+  if (dartDefine.isNotEmpty) {
+    return dartDefine;
+  }
+  const legacyDartDefine = String.fromEnvironment('NOCODB_BASE_URL');
+  if (legacyDartDefine.isNotEmpty) {
+    return legacyDartDefine;
+  }
+  return Platform.environment['NOCO_BASE_URL'] ??
+      Platform.environment['NOCODB_BASE_URL'] ??
+      'http://127.0.0.1:8080';
+}
+
+String _readInitialApiToken() {
+  const dartDefine = String.fromEnvironment('NOCO_TOKEN');
+  if (dartDefine.isNotEmpty) {
+    return dartDefine;
+  }
+  const legacyDartDefine = String.fromEnvironment('NOCODB_API_TOKEN');
+  if (legacyDartDefine.isNotEmpty) {
+    return legacyDartDefine;
+  }
+  return Platform.environment['NOCO_TOKEN'] ??
+      Platform.environment['NOCODB_API_TOKEN'] ??
+      '';
+}
+
+class _NocoDBWorkspaceSummary extends StatelessWidget {
+  const _NocoDBWorkspaceSummary({required this.workspace});
+
+  final NocoDBWorkspaceConfig workspace;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Connected workspace',
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 6),
+            Text('Base URL: ${workspace.baseUrl}'),
+            Text('Base ID: ${workspace.baseId}'),
+            Text('Tasks table: ${workspace.tasksTableId}'),
+            Text('Pomodoro table: ${workspace.pomodoroTableId}'),
+            Text('DailySummary table: ${workspace.dailySummaryTableId}'),
+          ],
+        ),
+      ),
     );
   }
 }

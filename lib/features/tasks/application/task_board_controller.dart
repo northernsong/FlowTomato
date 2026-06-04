@@ -120,7 +120,7 @@ class TaskBoardController extends ChangeNotifier {
         plannedPomodoros: 1,
       ),
       FlowTask.create(
-        title: 'Review Feishu Base fields',
+        title: 'Review NocoDB Base fields',
         note: 'Prepare for the sync phase after local UI lands.',
         priority: TaskPriority.low,
         plannedPomodoros: 1,
