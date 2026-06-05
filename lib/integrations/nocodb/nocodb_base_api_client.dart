@@ -136,6 +136,19 @@ class NocoDBApiClient {
     );
   }
 
+  Future<void> deleteRecord({
+    required String apiToken,
+    required String tableId,
+    required String recordId,
+  }) async {
+    await _requestBody(
+      apiToken: apiToken,
+      method: NocoDBHttpMethod.delete,
+      path: '/api/v2/tables/$tableId/records',
+      body: {'Id': int.tryParse(recordId) ?? recordId},
+    );
+  }
+
   Future<void> validateTable({
     required String apiToken,
     required String tableId,

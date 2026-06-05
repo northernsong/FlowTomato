@@ -19,35 +19,51 @@ void main() {
       dailySummaryTableId: 'tbl_summary',
     );
 
-    test('searchTodayTasks uses the configured Tasks table', () async {
-      final http = RecordingNocoDBHttpClient(
-        responses: [
-          const NocoDBHttpResponse(
-            statusCode: 200,
-            body: {
-              'list': [
-                {'Id': 7, 'Title': 'Search me'},
-              ],
-            },
-          ),
-        ],
-      );
-      final service = NocoDBSyncService(
-        apiClient: NocoDBApiClient(http: http),
-        workspace: workspace,
-      );
+    test(
+      'loadTodayTasks uses the configured Tasks table and maps records',
+      () async {
+        final http = RecordingNocoDBHttpClient(
+          responses: [
+            const NocoDBHttpResponse(
+              statusCode: 200,
+              body: {
+                'list': [
+                  {
+                    'Id': 7,
+                    'Local ID': 'task-7',
+                    'Title': 'Search me',
+                    'Status': 'todo',
+                    'Priority': 'medium',
+                    'Planned Pomodoros': 1,
+                    'Completed Pomodoros': 0,
+                    'Sort Order': 0,
+                    'Date': '2026-06-01',
+                    'Created At': '2026-06-01T08:00:00.000Z',
+                    'Updated At': '2026-06-01T08:00:00.000Z',
+                    'Sync Status': 'synced',
+                  },
+                ],
+              },
+            ),
+          ],
+        );
+        final service = NocoDBSyncService(
+          apiClient: NocoDBApiClient(http: http),
+          workspace: workspace,
+        );
 
-      final records = await service.searchTodayTasks(
-        date: DateTime.utc(2026, 6, 1),
-      );
+        final tasks = await service.loadTodayTasks(DateTime.utc(2026, 6, 1));
 
-      expect(records.single.recordId, '7');
-      expect(http.requests.single.path, '/api/v2/tables/tbl_tasks/records');
-      expect(
-        http.requests.single.queryParameters['where'],
-        '(Date,eq,2026-06-01)',
-      );
-    });
+        expect(tasks.single.recordId, '7');
+        expect(tasks.single.task.id, 'task-7');
+        expect(tasks.single.task.title, 'Search me');
+        expect(http.requests.single.path, '/api/v2/tables/tbl_tasks/records');
+        expect(
+          http.requests.single.queryParameters['where'],
+          '(Date,eq,2026-06-01)',
+        );
+      },
+    );
 
     test('createTask maps task fields and creates a record', () async {
       final http = RecordingNocoDBHttpClient(
@@ -64,12 +80,49 @@ void main() {
       );
 
       final task = FlowTask.create(title: 'Sync this');
-      final recordId = await service.createTask(task: task);
+      final recordId = await service.createTask(task);
 
       expect(recordId, '8');
       expect(http.requests.single.body, containsPair('Title', 'Sync this'));
       expect(http.requests.single.path, contains('/tables/tbl_tasks/records'));
     });
+
+    test(
+      'createTask retries without enum fields when NocoDB single-select options are missing',
+      () async {
+        final http = RecordingNocoDBHttpClient(
+          responses: [
+            const NocoDBHttpResponse(
+              statusCode: 400,
+              body: {
+                'msg':
+                    'Invalid option(s) "todo" provided for column "Status". Valid options are ""',
+              },
+            ),
+            const NocoDBHttpResponse(
+              statusCode: 200,
+              body: {'Id': 10, 'Title': 'Fallback sync'},
+            ),
+          ],
+        );
+        final service = NocoDBSyncService(
+          apiClient: NocoDBApiClient(http: http),
+          workspace: workspace,
+        );
+
+        final recordId = await service.createTask(
+          FlowTask.create(title: 'Fallback sync'),
+        );
+
+        expect(recordId, '10');
+        expect(http.requests, hasLength(2));
+        expect(http.requests.first.body, contains('Status'));
+        expect(http.requests.last.body, isNot(contains('Status')));
+        expect(http.requests.last.body, isNot(contains('Priority')));
+        expect(http.requests.last.body, isNot(contains('Sync Status')));
+        expect(http.requests.last.body, containsPair('Title', 'Fallback sync'));
+      },
+    );
 
     test('updateTask maps task fields and updates the record id', () async {
       final http = RecordingNocoDBHttpClient(
@@ -95,5 +148,44 @@ void main() {
       expect(http.requests.single.body, containsPair('Status', 'done'));
       expect(http.requests.single.path, endsWith('/records'));
     });
+
+    test(
+      'updateTask retries without enum fields when NocoDB single-select options are missing',
+      () async {
+        final http = RecordingNocoDBHttpClient(
+          responses: [
+            const NocoDBHttpResponse(
+              statusCode: 400,
+              body: {
+                'msg':
+                    'Invalid option(s) "done" provided for column "Status". Valid options are ""',
+              },
+            ),
+            const NocoDBHttpResponse(
+              statusCode: 200,
+              body: {'Id': 11, 'Title': 'Fallback update'},
+            ),
+          ],
+        );
+        final service = NocoDBSyncService(
+          apiClient: NocoDBApiClient(http: http),
+          workspace: workspace,
+        );
+
+        await service.updateTask(
+          recordId: '11',
+          task: FlowTask.create(
+            title: 'Fallback update',
+          ).copyWith(status: TaskStatus.done),
+        );
+
+        expect(http.requests, hasLength(2));
+        expect(http.requests.first.body, contains('Status'));
+        expect(http.requests.last.body, isNot(contains('Status')));
+        expect(http.requests.last.body, isNot(contains('Priority')));
+        expect(http.requests.last.body, isNot(contains('Sync Status')));
+        expect(http.requests.last.body, containsPair('Id', 11));
+      },
+    );
   });
 }

@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "run_dir": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan",
+  "spritesheet": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/final/spritesheet.webp",
+  "validation": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/final/validation.json",
+  "contact_sheet": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/qa/contact-sheet.png",
+  "review": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/qa/review.json",
+  "package": "/Users/song_y/.codex/pets/ershuan"
+}

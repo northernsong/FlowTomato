@@ -12,6 +12,7 @@ import 'integrations/nocodb/nocodb_base_api_client.dart';
 import 'integrations/nocodb/nocodb_http.dart';
 import 'integrations/nocodb/nocodb_models.dart';
 import 'integrations/nocodb/nocodb_setup_service.dart';
+import 'integrations/nocodb/nocodb_sync_service.dart';
 import 'integrations/nocodb/nocodb_workspace_cache.dart';
 
 void main() {
@@ -19,19 +20,28 @@ void main() {
 }
 
 class FlowTomatoApp extends StatelessWidget {
-  const FlowTomatoApp({super.key, this.promptForNocoDBOnStart = true});
+  const FlowTomatoApp({
+    super.key,
+    this.promptForNocoDBOnStart = true,
+    this.nocoDBWorkspaceCache,
+  });
 
   final bool promptForNocoDBOnStart;
+  final NocoDBWorkspaceCache? nocoDBWorkspaceCache;
 
   @override
   Widget build(BuildContext context) {
+    final workspaceCache = nocoDBWorkspaceCache ?? NocoDBWorkspaceCache();
     return MaterialApp(
       title: 'FlowTomato',
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.system,
       theme: _buildTheme(Brightness.light),
       darkTheme: _buildTheme(Brightness.dark),
-      home: FlowTomatoHomePage(promptForNocoDBOnStart: promptForNocoDBOnStart),
+      home: FlowTomatoHomePage(
+        promptForNocoDBOnStart: promptForNocoDBOnStart,
+        nocoDBWorkspaceCache: workspaceCache,
+      ),
     );
   }
 
@@ -63,9 +73,14 @@ class FlowTomatoApp extends StatelessWidget {
 }
 
 class FlowTomatoHomePage extends StatefulWidget {
-  const FlowTomatoHomePage({super.key, this.promptForNocoDBOnStart = true});
+  const FlowTomatoHomePage({
+    super.key,
+    this.promptForNocoDBOnStart = true,
+    required this.nocoDBWorkspaceCache,
+  });
 
   final bool promptForNocoDBOnStart;
+  final NocoDBWorkspaceCache nocoDBWorkspaceCache;
 
   @override
   State<FlowTomatoHomePage> createState() => _FlowTomatoHomePageState();
@@ -85,7 +100,7 @@ class _FlowTomatoHomePageState extends State<FlowTomatoHomePage> {
     _taskBoard = TaskBoardController()..addListener(_refresh);
     _pomodoro = PomodoroController()..addListener(_handlePomodoroChange);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _maybePromptNocoDBSettings();
+      _bootstrapNocoDB();
     });
   }
 
@@ -242,11 +257,52 @@ class _FlowTomatoHomePageState extends State<FlowTomatoHomePage> {
     _startTicker();
   }
 
-  Future<void> _showNocoDBSettings() {
-    return showDialog<void>(
+  Future<void> _showNocoDBSettings() async {
+    final cached = await widget.nocoDBWorkspaceCache.read();
+    if (!mounted) {
+      return;
+    }
+    await showDialog<void>(
       context: context,
-      builder: (context) => const _NocoDBSettingsDialog(),
+      builder: (context) => _NocoDBSettingsDialog(
+        workspaceCache: widget.nocoDBWorkspaceCache,
+        initialWorkspace: cached,
+      ),
     );
+    final latest = await widget.nocoDBWorkspaceCache.read();
+    if (latest != null && mounted) {
+      await _connectNocoDBTasks(latest);
+    }
+  }
+
+  Future<void> _bootstrapNocoDB() async {
+    if (!widget.promptForNocoDBOnStart) {
+      return;
+    }
+    final cached = await widget.nocoDBWorkspaceCache.read();
+    if (!mounted) {
+      return;
+    }
+    if (cached != null) {
+      await _connectNocoDBTasks(cached);
+      return;
+    }
+    await _maybePromptNocoDBSettings();
+  }
+
+  Future<void> _connectNocoDBTasks(NocoDBWorkspaceConfig workspace) async {
+    final syncService = NocoDBSyncService(
+      apiClient: NocoDBApiClient(
+        http: HttpNocoDBHttpClient(baseUri: Uri.parse(workspace.baseUrl)),
+      ),
+      workspace: workspace,
+    );
+    _taskBoard.setSyncService(syncService);
+    try {
+      await _taskBoard.loadTodayTasks();
+    } catch (_) {
+      // Keep the local workbench usable if NocoDB is temporarily unreachable.
+    }
   }
 
   Future<void> _maybePromptNocoDBSettings() async {
@@ -254,7 +310,7 @@ class _FlowTomatoHomePageState extends State<FlowTomatoHomePage> {
       return;
     }
     _didPromptNocoDB = true;
-    final cached = await NocoDBWorkspaceCache().read();
+    final cached = await widget.nocoDBWorkspaceCache.read();
     if (cached != null) {
       return;
     }
@@ -334,24 +390,42 @@ class _Header extends StatelessWidget {
 }
 
 class _NocoDBSettingsDialog extends StatefulWidget {
-  const _NocoDBSettingsDialog();
+  const _NocoDBSettingsDialog({
+    required this.workspaceCache,
+    this.initialWorkspace,
+  });
+
+  final NocoDBWorkspaceCache workspaceCache;
+  final NocoDBWorkspaceConfig? initialWorkspace;
 
   @override
   State<_NocoDBSettingsDialog> createState() => _NocoDBSettingsDialogState();
 }
 
 class _NocoDBSettingsDialogState extends State<_NocoDBSettingsDialog> {
-  final TextEditingController _baseUrlController = TextEditingController(
-    text: _readInitialBaseUrl(),
-  );
-  final TextEditingController _apiTokenController = TextEditingController(
-    text: _readInitialApiToken(),
-  );
+  late final TextEditingController _baseUrlController;
+  late final TextEditingController _apiTokenController;
 
   NocoDBWorkspaceConfig? _workspace;
   String? _statusMessage;
   bool _isBusy = false;
   bool _canInitialize = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final cached = widget.initialWorkspace;
+    _baseUrlController = TextEditingController(
+      text: cached?.baseUrl ?? _readInitialBaseUrl(),
+    );
+    _apiTokenController = TextEditingController(
+      text: cached?.apiToken ?? _readInitialApiToken(),
+    );
+    if (cached != null) {
+      _workspace = cached;
+      _statusMessage = 'Cached NocoDB workspace loaded.';
+    }
+  }
 
   @override
   void dispose() {
@@ -460,7 +534,7 @@ class _NocoDBSettingsDialogState extends State<_NocoDBSettingsDialog> {
       _statusMessage = 'Looking for FlowTomato workspace...';
     });
     try {
-      final cached = await NocoDBWorkspaceCache().read();
+      final cached = await widget.workspaceCache.read();
       final httpClient = HttpNocoDBHttpClient(
         baseUri: Uri.parse(config.baseUrl),
       );
@@ -488,7 +562,7 @@ class _NocoDBSettingsDialogState extends State<_NocoDBSettingsDialog> {
         });
         return;
       }
-      await NocoDBWorkspaceCache().write(workspace);
+      await widget.workspaceCache.write(workspace);
       setState(() {
         _workspace = workspace;
         _canInitialize = false;
@@ -553,7 +627,7 @@ class _NocoDBSettingsDialogState extends State<_NocoDBSettingsDialog> {
         baseUrl: config.baseUrl,
         apiToken: config.apiToken,
       );
-      await NocoDBWorkspaceCache().write(workspace);
+      await widget.workspaceCache.write(workspace);
       if (!mounted) {
         return;
       }

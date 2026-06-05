@@ -66,5 +66,39 @@ void main() {
       expect(fields['Date'], '2026-06-01');
       expect(fields['Sync Status'], 'pending');
     });
+
+    test('taskFromRecord maps NocoDB record fields to FlowTask values', () {
+      final task = NocoDBFieldMapper.taskFromRecord(
+        recordId: '42',
+        fields: {
+          'Local ID': 'task-remote-1',
+          'Title': 'Loaded from NocoDB',
+          'Note': 'Remote note',
+          'Status': 'now',
+          'Priority': 'high',
+          'Planned Pomodoros': 4,
+          'Completed Pomodoros': 2,
+          'Sort Order': 3,
+          'Date': '2026-06-05',
+          'Created At': '2026-06-05T01:00:00.000Z',
+          'Updated At': '2026-06-05T02:00:00.000Z',
+          'Completed At': null,
+          'Sync Status': 'synced',
+        },
+      );
+
+      expect(task.id, 'task-remote-1');
+      expect(task.title, 'Loaded from NocoDB');
+      expect(task.note, 'Remote note');
+      expect(task.status, TaskStatus.now);
+      expect(task.priority, TaskPriority.high);
+      expect(task.plannedPomodoros, 4);
+      expect(task.completedPomodoros, 2);
+      expect(task.sortOrder, 3);
+      expect(task.date, DateTime.utc(2026, 6, 5));
+      expect(task.createdAt, DateTime.utc(2026, 6, 5, 1));
+      expect(task.updatedAt, DateTime.utc(2026, 6, 5, 2));
+      expect(task.syncStatus, SyncStatus.synced);
+    });
   });
 }

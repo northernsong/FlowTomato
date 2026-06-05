@@ -1,0 +1,962 @@
+{
+  "ok": true,
+  "frames_root": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames",
+  "errors": [],
+  "warnings": [],
+  "rows": [
+    {
+      "state": "idle",
+      "expected_frames": 6,
+      "actual_frames": 6,
+      "extraction_method": "components",
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/idle/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21811,
+          "bbox": [
+            20,
+            5,
+            171,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 97
+        },
+        {
+          "index": 1,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/idle/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21863,
+          "bbox": [
+            21,
+            5,
+            171,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 111
+        },
+        {
+          "index": 2,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/idle/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 22017,
+          "bbox": [
+            21,
+            5,
+            171,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 88
+        },
+        {
+          "index": 3,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/idle/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21705,
+          "bbox": [
+            23,
+            5,
+            168,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 113
+        },
+        {
+          "index": 4,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/idle/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21609,
+          "bbox": [
+            22,
+            5,
+            169,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 96
+        },
+        {
+          "index": 5,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/idle/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21972,
+          "bbox": [
+            22,
+            5,
+            170,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 125
+        }
+      ]
+    },
+    {
+      "state": "running-right",
+      "expected_frames": 8,
+      "actual_frames": 8,
+      "extraction_method": "components",
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-right/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 11004,
+          "bbox": [
+            5,
+            56,
+            187,
+            151
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 158
+        },
+        {
+          "index": 1,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-right/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 12314,
+          "bbox": [
+            5,
+            45,
+            187,
+            162
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 175
+        },
+        {
+          "index": 2,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-right/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 10964,
+          "bbox": [
+            5,
+            49,
+            187,
+            159
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 160
+        },
+        {
+          "index": 3,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-right/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 11567,
+          "bbox": [
+            5,
+            44,
+            187,
+            164
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 168
+        },
+        {
+          "index": 4,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-right/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 11126,
+          "bbox": [
+            5,
+            49,
+            187,
+            159
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 187
+        },
+        {
+          "index": 5,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-right/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 12457,
+          "bbox": [
+            5,
+            42,
+            187,
+            165
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 177
+        },
+        {
+          "index": 6,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-right/06.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 10758,
+          "bbox": [
+            5,
+            50,
+            187,
+            157
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 154
+        },
+        {
+          "index": 7,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-right/07.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 12642,
+          "bbox": [
+            5,
+            37,
+            187,
+            170
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 197
+        }
+      ]
+    },
+    {
+      "state": "running-left",
+      "expected_frames": 8,
+      "actual_frames": 8,
+      "extraction_method": "components",
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-left/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 12647,
+          "bbox": [
+            5,
+            51,
+            187,
+            157
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 162
+        },
+        {
+          "index": 1,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-left/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 14314,
+          "bbox": [
+            5,
+            38,
+            187,
+            170
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 177
+        },
+        {
+          "index": 2,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-left/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 11458,
+          "bbox": [
+            5,
+            46,
+            187,
+            161
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 165
+        },
+        {
+          "index": 3,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-left/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 11627,
+          "bbox": [
+            5,
+            44,
+            187,
+            164
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 168
+        },
+        {
+          "index": 4,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-left/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 10644,
+          "bbox": [
+            5,
+            49,
+            187,
+            159
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 172
+        },
+        {
+          "index": 5,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-left/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 9792,
+          "bbox": [
+            5,
+            47,
+            187,
+            160
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 148
+        },
+        {
+          "index": 6,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-left/06.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 10067,
+          "bbox": [
+            5,
+            53,
+            187,
+            154
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 159
+        },
+        {
+          "index": 7,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running-left/07.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 11516,
+          "bbox": [
+            5,
+            41,
+            187,
+            167
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 163
+        }
+      ]
+    },
+    {
+      "state": "waving",
+      "expected_frames": 4,
+      "actual_frames": 4,
+      "extraction_method": "components",
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/waving/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21421,
+          "bbox": [
+            22,
+            5,
+            170,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 83
+        },
+        {
+          "index": 1,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/waving/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 22410,
+          "bbox": [
+            14,
+            5,
+            177,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 78
+        },
+        {
+          "index": 2,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/waving/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21925,
+          "bbox": [
+            17,
+            5,
+            175,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 65
+        },
+        {
+          "index": 3,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/waving/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21026,
+          "bbox": [
+            23,
+            5,
+            168,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 96
+        }
+      ]
+    },
+    {
+      "state": "jumping",
+      "expected_frames": 5,
+      "actual_frames": 5,
+      "extraction_method": "components",
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/jumping/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20308,
+          "bbox": [
+            5,
+            9,
+            187,
+            198
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 163
+        },
+        {
+          "index": 1,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/jumping/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 17370,
+          "bbox": [
+            8,
+            5,
+            184,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 164
+        },
+        {
+          "index": 2,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/jumping/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 9653,
+          "bbox": [
+            5,
+            51,
+            187,
+            157
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 86
+        },
+        {
+          "index": 3,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/jumping/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 15675,
+          "bbox": [
+            5,
+            16,
+            187,
+            192
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 141
+        },
+        {
+          "index": 4,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/jumping/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 18386,
+          "bbox": [
+            5,
+            23,
+            187,
+            184
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 150
+        }
+      ]
+    },
+    {
+      "state": "failed",
+      "expected_frames": 8,
+      "actual_frames": 8,
+      "extraction_method": "components",
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/failed/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 23028,
+          "bbox": [
+            5,
+            10,
+            187,
+            198
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 202
+        },
+        {
+          "index": 1,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/failed/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20866,
+          "bbox": [
+            5,
+            21,
+            187,
+            187
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 201
+        },
+        {
+          "index": 2,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/failed/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 14970,
+          "bbox": [
+            5,
+            52,
+            187,
+            156
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 135
+        },
+        {
+          "index": 3,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/failed/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 15270,
+          "bbox": [
+            5,
+            48,
+            187,
+            159
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 122
+        },
+        {
+          "index": 4,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/failed/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 18558,
+          "bbox": [
+            5,
+            35,
+            187,
+            173
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 174
+        },
+        {
+          "index": 5,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/failed/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 24880,
+          "bbox": [
+            5,
+            5,
+            187,
+            202
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 209
+        },
+        {
+          "index": 6,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/failed/06.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 19810,
+          "bbox": [
+            5,
+            27,
+            187,
+            181
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 163
+        },
+        {
+          "index": 7,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/failed/07.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 23255,
+          "bbox": [
+            5,
+            11,
+            187,
+            196
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 196
+        }
+      ]
+    },
+    {
+      "state": "waiting",
+      "expected_frames": 6,
+      "actual_frames": 6,
+      "extraction_method": "components",
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/waiting/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 18614,
+          "bbox": [
+            29,
+            5,
+            162,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 96
+        },
+        {
+          "index": 1,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/waiting/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20450,
+          "bbox": [
+            26,
+            5,
+            166,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 95
+        },
+        {
+          "index": 2,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/waiting/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 18432,
+          "bbox": [
+            31,
+            5,
+            161,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 95
+        },
+        {
+          "index": 3,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/waiting/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 18679,
+          "bbox": [
+            31,
+            5,
+            160,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 107
+        },
+        {
+          "index": 4,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/waiting/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 18225,
+          "bbox": [
+            32,
+            5,
+            159,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 96
+        },
+        {
+          "index": 5,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/waiting/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 18986,
+          "bbox": [
+            30,
+            5,
+            162,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 91
+        }
+      ]
+    },
+    {
+      "state": "running",
+      "expected_frames": 6,
+      "actual_frames": 6,
+      "extraction_method": "components",
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 19344,
+          "bbox": [
+            5,
+            38,
+            187,
+            169
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 111
+        },
+        {
+          "index": 1,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 19416,
+          "bbox": [
+            5,
+            37,
+            187,
+            170
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 131
+        },
+        {
+          "index": 2,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 19316,
+          "bbox": [
+            5,
+            38,
+            187,
+            169
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 133
+        },
+        {
+          "index": 3,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 19059,
+          "bbox": [
+            5,
+            38,
+            187,
+            169
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 135
+        },
+        {
+          "index": 4,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20041,
+          "bbox": [
+            5,
+            36,
+            187,
+            171
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 150
+        },
+        {
+          "index": 5,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/running/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 19563,
+          "bbox": [
+            5,
+            37,
+            187,
+            171
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 156
+        }
+      ]
+    },
+    {
+      "state": "review",
+      "expected_frames": 6,
+      "actual_frames": 6,
+      "extraction_method": "components",
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/review/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21224,
+          "bbox": [
+            22,
+            5,
+            169,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 109
+        },
+        {
+          "index": 1,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/review/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 23499,
+          "bbox": [
+            5,
+            9,
+            187,
+            198
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 102
+        },
+        {
+          "index": 2,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/review/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21769,
+          "bbox": [
+            22,
+            5,
+            170,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 126
+        },
+        {
+          "index": 3,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/review/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 19653,
+          "bbox": [
+            26,
+            5,
+            166,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 90
+        },
+        {
+          "index": 4,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/review/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 22204,
+          "bbox": [
+            21,
+            5,
+            171,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 125
+        },
+        {
+          "index": 5,
+          "file": "/Users/song_y/IdeaProjects/FlowTomato/pet-runs/ershuan/frames/review/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21575,
+          "bbox": [
+            21,
+            5,
+            170,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 125
+        }
+      ]
+    }
+  ]
+}
