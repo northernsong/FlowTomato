@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'features/pomodoro/application/pomodoro_controller.dart';
+import 'features/pomodoro/application/menu_bar_pomodoro_presenter.dart';
 import 'features/pomodoro/domain/pomodoro_state.dart';
 import 'features/tasks/application/task_board_controller.dart';
 import 'features/tasks/domain/task.dart';
@@ -89,6 +90,7 @@ class FlowTomatoHomePage extends StatefulWidget {
 class _FlowTomatoHomePageState extends State<FlowTomatoHomePage> {
   late final TaskBoardController _taskBoard;
   late final PomodoroController _pomodoro;
+  late final MenuBarPomodoroBridge _menuBarPomodoro;
   final TextEditingController _newTaskController = TextEditingController();
   Timer? _timer;
   int _recordedSessions = 0;
@@ -99,7 +101,14 @@ class _FlowTomatoHomePageState extends State<FlowTomatoHomePage> {
     super.initState();
     _taskBoard = TaskBoardController()..addListener(_refresh);
     _pomodoro = PomodoroController()..addListener(_handlePomodoroChange);
+    _menuBarPomodoro = MenuBarPomodoroBridge()
+      ..configureActions(
+        onPause: _pauseFocus,
+        onResume: _resumeFocus,
+        onReset: _resetFocus,
+      );
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncPomodoroMenuBar();
       _bootstrapNocoDB();
     });
   }
@@ -134,6 +143,7 @@ class _FlowTomatoHomePageState extends State<FlowTomatoHomePage> {
       _recordedSessions = _pomodoro.completedSessions.length;
       _timer?.cancel();
     }
+    _syncPomodoroMenuBar();
     _refresh();
   }
 
@@ -189,15 +199,9 @@ class _FlowTomatoHomePageState extends State<FlowTomatoHomePage> {
                           newTaskController: _newTaskController,
                           onAddTask: _addTask,
                           onStartFocus: _startFocus,
-                          onPause: _pomodoro.pause,
-                          onResume: () {
-                            _pomodoro.resume();
-                            _startTicker();
-                          },
-                          onReset: () {
-                            _timer?.cancel();
-                            _pomodoro.reset();
-                          },
+                          onPause: _pauseFocus,
+                          onResume: _resumeFocus,
+                          onReset: _resetFocus,
                         );
                       }
                       return Row(
@@ -218,15 +222,9 @@ class _FlowTomatoHomePageState extends State<FlowTomatoHomePage> {
                               task: _taskBoard.nowTask,
                               pomodoro: _pomodoro,
                               onStartFocus: _startFocus,
-                              onPause: _pomodoro.pause,
-                              onResume: () {
-                                _pomodoro.resume();
-                                _startTicker();
-                              },
-                              onReset: () {
-                                _timer?.cancel();
-                                _pomodoro.reset();
-                              },
+                              onPause: _pauseFocus,
+                              onResume: _resumeFocus,
+                              onReset: _resetFocus,
                             ),
                           ),
                         ],
@@ -255,6 +253,27 @@ class _FlowTomatoHomePageState extends State<FlowTomatoHomePage> {
     final task = _taskBoard.nowTask;
     _pomodoro.startFocus(taskId: task?.id, taskTitle: task?.title);
     _startTicker();
+  }
+
+  void _pauseFocus() {
+    _pomodoro.pause();
+    _timer?.cancel();
+  }
+
+  void _resumeFocus() {
+    _pomodoro.resume();
+    if (_pomodoro.state.status == PomodoroStatus.running) {
+      _startTicker();
+    }
+  }
+
+  void _resetFocus() {
+    _timer?.cancel();
+    _pomodoro.reset();
+  }
+
+  void _syncPomodoroMenuBar() {
+    unawaited(_menuBarPomodoro.update(_pomodoro.state));
   }
 
   Future<void> _showNocoDBSettings() async {
